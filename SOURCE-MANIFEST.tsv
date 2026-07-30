@@ -1,0 +1,22 @@
+export_path	source_path	source_ref	classification
+client_sdk	acsc/client_sdk	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	AsynCS implementation source
+crypto_lib	acsc/crypto_lib	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	AsynCS cryptographic source
+openwhisk_extensions	acsc/openwhisk_extensions	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	AsynCS integration source
+openwhisk_runtime	acsc/openwhisk_runtime	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	AsynCS runtime adapter source
+sgx_kms	acsc/sgx_kms	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	SGX KMS source excluding generated/private files
+sgx_worker	acsc/sgx_worker	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	SGX worker source excluding generated/private files
+tests	acsc/tests	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Minimal public tests and validators retained in the release
+trusted	acsc/trusted	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Trusted enclave source required by the selected build
+test_enclave	acsc/test_enclave	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Minimal enclave test source and EDL required by the selected build
+scripts	acsc/scripts	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Minimal build, signing, and validation scripts
+workloads/backend_pressure_sleep50	acsc/workloads/backend_pressure_sleep50	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Current C1/backend-pressure workload source, contract, and measured WASM artifact
+workloads/c2_sleep50_package_grid	acsc/workloads/c2_sleep50_package_grid	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Current C2 sleep50 package-grid builder, contract, source metadata, and measured WASM artifacts
+workloads/c3_deterministic_io	acsc/workloads/c3_deterministic_io	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Current C3 deterministic IO workload source, contract, and measured WASM artifact
+workloads/c5_representative_warm	acsc/workloads/c5_representative_warm	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Current C5 representative warm workload source, contract, and measured WASM artifact
+sgx_worker/lib	acsc/sgx_worker/lib	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Required public MCL headers; no generated objects or binaries
+sgx_kms/Enclave/Enclave.config.xml	acsc/sgx_kms/Enclave/Enclave.config.xml	10e6f77e13969ef1a26a1ffa03207bdd2e117c8c	Build configuration retained as a source input; no signing key
+third-party/openwhisk/asynccs-openwhisk.patch	https://github.com/apache/openwhisk.git	base 579635176cc0d7ae53d8ca14502e6b8b4e58a2eb to 05cf828b78fd93774b6bc0d2f0a0d1236f5137b8	Sanitized complete integration patch; upstream history plus one commit at https://github.com/TEEs-projects/openwhisk-asyncs (main)
+third-party/wamr/asynccs-wamr.patch	https://github.com/wasm-micro-runtime/wasm-micro-runtime.git	base 45e3e1ea984b26c076859c6e659cac6f42fffaed to 0e8e3967b70a79f5f4942da9a18051ee48ecee64	Unchanged integration patch; upstream history plus one commit at https://github.com/TEEs-projects/wamr-asyncs (main)
+third-party/SOURCE-REFS.tsv	release-provenance	pinned public bases and release refs	Component history and exact reconstruction tree/hash manifest
+third-party/README.md	release-documentation	base identifiers in this file and SOURCE-MANIFEST.tsv	Patch application instructions
+third-party/apply-patches.sh	release-script	base identifiers in this file and SOURCE-MANIFEST.tsv	Relative-path patch application helper

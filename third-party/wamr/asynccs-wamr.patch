@@ -1,0 +1,137 @@
+diff --git a/.gitignore b/.gitignore
+index baf11c89..21c14cd9 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -21,9 +21,14 @@ core/iwasm/libraries/lib-wasi-threads/test/*.wasm
+ core/iwasm/libraries/lib-socket/test/*.wasm
+ 
+ product-mini/app-samples/hello-world/test.wasm
++product-mini/app-samples/hello-world/test_wasm.h
+ product-mini/platforms/linux-sgx/enclave-sample/App/
+ product-mini/platforms/linux-sgx/enclave-sample/Enclave/
+ product-mini/platforms/linux-sgx/enclave-sample/iwasm
++product-mini/platforms/linux-sgx/enclave-sample/test.wasm
++product-mini/platforms/linux-sgx/enclave-sample/test_wasm.h
++
++wamr-compiler/output.log
+ 
+ build_out
+ tests/wamr-test-suites/workspace
+diff --git a/core/shared/platform/linux-sgx/sgx_file.c b/core/shared/platform/linux-sgx/sgx_file.c
+index a8ae8d2f..dc65df98 100644
+--- a/core/shared/platform/linux-sgx/sgx_file.c
++++ b/core/shared/platform/linux-sgx/sgx_file.c
+@@ -13,6 +13,22 @@
+ 
+ #ifndef SGX_DISABLE_WASI
+ 
++__attribute__((weak)) void
++wasm_sgx_capture_write(int fd, const char *buf, size_t len)
++{
++    (void)fd;
++    (void)buf;
++    (void)len;
++}
++
++__attribute__((weak)) ssize_t
++wasm_sgx_read_stdin(char *buf, size_t len)
++{
++    (void)buf;
++    (void)len;
++    return -1;
++}
++
+ #define TRACE_FUNC() os_printf("undefined %s\n", __FUNCTION__)
+ #define TRACE_OCALL_FAIL() os_printf("ocall %s failed!\n", __FUNCTION__)
+ 
+@@ -253,6 +269,13 @@ read(int fd, void *buf, size_t size)
+         return -1;
+     }
+ 
++    if (fd == 0) {
++        ret = wasm_sgx_read_stdin(p, size);
++        if (ret >= 0) {
++            return ret;
++        }
++    }
++
+     count = (size + size_read_max - 1) / size_read_max;
+     for (i = 0; i < count; i++) {
+         size_read = (i < count - 1) ? size_read_max : size - size_read_max * i;
+@@ -378,6 +401,23 @@ readv_internal(int fd, const struct iovec *iov, int iovcnt, bool has_offset,
+     if (iov == NULL || iovcnt < 1)
+         return -1;
+ 
++    if (fd == 0) {
++        ssize_t total = 0;
++        for (i = 0; i < iovcnt; i++) {
++            ret = wasm_sgx_read_stdin((char *)iov[i].iov_base, iov[i].iov_len);
++            if (ret < 0) {
++                break;
++            }
++            total += ret;
++            if ((size_t)ret < iov[i].iov_len) {
++                return total;
++            }
++        }
++        if (total > 0) {
++            return total;
++        }
++    }
++
+     for (i = 0; i < iovcnt; i++) {
+         total_size += iov[i].iov_len;
+     }
+@@ -478,6 +518,12 @@ writev_internal(int fd, const struct iovec *iov, int iovcnt, bool has_offset,
+         p += iov[i].iov_len;
+     }
+ 
++    if (fd == 1 || fd == 2) {
++        for (i = 0; i < iovcnt; i++) {
++            wasm_sgx_capture_write(fd, (const char *)iov[i].iov_base, iov[i].iov_len);
++        }
++    }
++
+     if (ocall_writev(&ret, fd, (char *)iov1, (uint32)total_size, iovcnt,
+                      has_offset, offset)
+         != SGX_SUCCESS) {
+diff --git a/core/shared/platform/linux-sgx/sgx_platform.c b/core/shared/platform/linux-sgx/sgx_platform.c
+index d2599086..6e4b2267 100644
+--- a/core/shared/platform/linux-sgx/sgx_platform.c
++++ b/core/shared/platform/linux-sgx/sgx_platform.c
+@@ -6,6 +6,7 @@
+ #include "platform_api_vmcore.h"
+ #include "platform_api_extension.h"
+ #include "sgx_rsrv_mem_mngr.h"
++#include <stdio.h>
+ 
+ #if WASM_ENABLE_SGX_IPFS != 0
+ #include "sgx_ipfs.h"
+diff --git a/product-mini/platforms/linux-sgx/CMakeLists.txt b/product-mini/platforms/linux-sgx/CMakeLists.txt
+index dd2dc391..8b02f962 100644
+--- a/product-mini/platforms/linux-sgx/CMakeLists.txt
++++ b/product-mini/platforms/linux-sgx/CMakeLists.txt
+@@ -12,6 +12,7 @@ set (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+ set (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+ 
+ # Set WAMR_BUILD_TARGET
++set(WAMR_BUILD_SIMD 0)
+ if (NOT DEFINED WAMR_BUILD_TARGET)
+   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+     # Build as X86_64 by default in 64-bit platform
+diff --git a/product-mini/platforms/linux-sgx/enclave-sample/Makefile b/product-mini/platforms/linux-sgx/enclave-sample/Makefile
+index 8fd053a5..76c145d8 100644
+--- a/product-mini/platforms/linux-sgx/enclave-sample/Makefile
++++ b/product-mini/platforms/linux-sgx/enclave-sample/Makefile
+@@ -5,9 +5,9 @@
+ 
+ SGX_SDK ?= /opt/intel/sgxsdk
+ SGX_SSL ?= /opt/intel/sgxssl
+-SGX_MODE ?= SIM
++SGX_MODE ?= HW
+ SGX_ARCH ?= x64
+-SGX_DEBUG ?= 0
++SGX_DEBUG ?= 1
+ SPEC_TEST ?= 0
+ 
+ # These variables are automatically set by CMakeLists.txt

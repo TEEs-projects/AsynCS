@@ -1,0 +1,153 @@
+enclave {
+    from "sgx_tstdc.edl" import *;
+    from "sgx_pthread.edl" import *;
+
+    include "sgx_report.h"
+
+    trusted {
+        public void ecall_init_kms(
+            [in, size=sealed_size] uint8_t* sealed_data,
+            uint32_t sealed_size,
+            [out, size=out_sealed_size] uint8_t* out_sealed_data,
+            uint32_t out_sealed_size,
+            [out] uint32_t* actual_sealed_size
+        );
+        public int ecall_verify_quote(
+            [in, size=quote_size] uint8_t* quote,
+            uint32_t quote_size
+        );
+        /* Verify quote and cache result for a specific FID.
+         * Non-bypassable policy gating requires the enclave to perform this step;
+         * the host must not be able to "set verified" without providing a quote.
+         *
+         * Parameters:
+         *   fid: Function ID for policy lookup (policy[FID])
+         *   quote: Raw quote bytes (opaque to host bypass attempts)
+         *
+         * Returns: 0 on success, -1 on verification failure
+         */
+        public int ecall_verify_quote_for_fid(
+            [in, string] const char* fid,
+            [in, size=quote_size] uint8_t* quote,
+            uint32_t quote_size
+        );
+        public int ecall_get_key(
+            [in, string] const char* fid,
+            [in, count=64] uint8_t* public_key,
+            [out, count=124] uint8_t* key
+        );
+        public int ecall_get_public_key(
+            [in, string] const char* fid,
+            [out, count=65] uint8_t* public_key
+        );
+        
+        /* Batch DeriveKeys API: Combines FID key + label keys in single RPC
+         * Reduces cold start latency by eliminating multiple round trips
+         * 
+         * Parameters:
+         *   fid: Function ID for key derivation
+         *   label: Label = H(C_func) for label-key derivation
+         *   public_key: Worker's public key for secure channel
+         *   dkf_out: Output FID-derived key (124 bytes: encrypted)
+         *   dklabel_out: Output label-derived key (124 bytes: encrypted)
+         *
+         * Returns: 0 on success, -1 on error
+         *
+         * Security: Single VerifyRA check, separate BindLabelToFID check per label
+         */
+        public int ecall_derive_keys_batch(
+            [in, string] const char* fid,
+            [in, string] const char* label,
+            [in, count=64] uint8_t* public_key,
+            [out, count=124] uint8_t* dkf_out,
+            [out, count=124] uint8_t* dklabel_out
+        );
+
+        /* BF-IBE key-release boundary.
+         *
+         * The final bfibe-mcl-bls12381 path will return a variable-length,
+         * worker-bound ASBFREL1 envelope whose ciphertext contains an
+         * encrypted ASBFSKS1 private-key set. The worker identity must be
+         * derived from enclave-verified RA state and report_data binding, not
+         * supplied by the untrusted host.
+         */
+        public int ecall_get_bfibe_key_release(
+            [in, string] const char* fid,
+            [in, string] const char* label,
+            [in, count=64] uint8_t* public_key,
+            [out, size=release_capacity] uint8_t* release_out,
+            uint32_t release_capacity,
+            [out] uint32_t* actual_release_size
+        );
+
+        public int ecall_bfibe_extract_test();
+
+        public int ecall_get_bfibe_public_params(
+            [out, size=mpk_capacity] uint8_t* mpk_out,
+            uint32_t mpk_capacity,
+            [out] uint32_t* actual_mpk_size
+        );
+        
+        /* ============================================================
+         * POLICY REGISTRY APIs
+         * ============================================================ */
+        
+        /* Register policyFID for a given FID (write-once)
+         * First registration wins; subsequent attempts are rejected
+         * 
+         * Parameters:
+         *   fid: Function ID to register policy for
+         *   mrenclave: Required MRENCLAVE (32 bytes) for workers accessing this FID
+         *
+         * Returns: 0 on success, -1 if policy already exists (write-once)
+         */
+        public int ecall_register_policy_fid(
+            [in, string] const char* fid,
+            [in, count=32] uint8_t* mrenclave
+        );
+        
+        /* Bind label to FID (BindLabelToFID)
+         * Called at deployment time to bind label=H(C_func) to FID
+         * Label-key derivation will only succeed if label is bound to FID
+         *
+         * Parameters:
+         *   fid: Function ID
+         *   label: Label = H(C_func), hex string (64 chars)
+         *
+         * Returns: 0 on success, -1 on error
+         */
+        public int ecall_bind_label_to_fid(
+            [in, string] const char* fid,
+            [in, string] const char* label
+        );
+        
+        /* Set RA verification result
+         * Called by App after DCAP quote verification
+         * Caches the verified MRENCLAVE for policy checks
+         *
+         * Parameters:
+         *   verified: true if quote verified successfully
+         *   mrenclave: MRENCLAVE from verified quote (32 bytes)
+         *
+         * Returns: 0 on success
+         */
+        public int ecall_set_ra_result(
+            int verified,
+            [in, count=32] uint8_t* mrenclave
+        );
+        
+        /* Check if label is bound to FID
+         * Used for verification in label-key derivation
+         *
+         * Returns: 1 if bound, 0 if not bound
+         */
+        public int ecall_check_label_binding(
+            [in, string] const char* fid,
+            [in, string] const char* label
+        );
+    };
+
+    untrusted {
+        void ocall_print([in, string] const char *str);
+    };
+};

@@ -1,0 +1,14 @@
+[package]
+name = "asyncs-c3-deterministic-io"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sha2 = "=0.10.9"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

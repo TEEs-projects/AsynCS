@@ -1,0 +1,39 @@
+{
+  "artifact": "asyncs-backend-pressure-sleep50.wasm",
+  "artifact_lifecycle": "versioned_experiment_input",
+  "artifact_sha256": "7acaa09efe7de4824e983d17a478bb4d8a5ce908e21bb2211dbbfe7b909781d8",
+  "build_command": "cargo build --offline --locked --release --target wasm32-wasip1",
+  "build_target": "wasm32-wasip1",
+  "build_toolchain": {
+    "cargo": "cargo 1.96.0 (30a34c682 2026-05-25)",
+    "rustc": "rustc 1.96.0 (ac68faa20 2026-05-25)"
+  },
+  "duration_evidence": [
+    "workload_core_cycles",
+    "output_kem_cycles",
+    "output_aes_gcm_cycles",
+    "worker_exec_dur_ns"
+  ],
+  "intentional_ocall": "wasi_poll_oneoff_to_sgx_clock_nanosleep",
+  "profile": "asyncs",
+  "request_payload_bytes": 1024,
+  "request_payload_in_internal_workload": false,
+  "schema_version": "c1-asyncs-backend-pressure-workload-v2",
+  "sleep_releases_cpu": true,
+  "timing_contract": {
+    "derived_duration_policy": "only_when_tsc_hz_and_method_are_observed",
+    "tsc_frequency_method": "cpuid_0x15_crystal_or_calibrated_monotonic_raw_20ms_or_unavailable",
+    "workload_timing_schema": "enclave-rdtsc-v1"
+  },
+  "workload_compress_level": 0,
+  "workload_id": "asyncs-wasm-sleep-50ms",
+  "workload_input_bytes": 0,
+  "workload_input_mode": "none",
+  "workload_input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "workload_kind": "wasm_sleep",
+  "workload_logic_hash": "rust-std-thread-sleep-50ms-v1",
+  "workload_output_bytes": 0,
+  "workload_output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "workload_sleep_ms": 50,
+  "workload_timing_schema": "enclave-rdtsc-v1"
+}

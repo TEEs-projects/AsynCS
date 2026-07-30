@@ -1,0 +1,12 @@
+sgx_worker
+enclave.so
+enclave.signed.so
+Enclave/Enclave_private.pem
+Enclave/Enclave.config.xml
+App/*.o
+Enclave/*.o
+Enclave/*_t.c
+Enclave/*_t.h
+App/*_u.c
+App/*_u.h
+lib/

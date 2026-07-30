@@ -1,0 +1,72 @@
+{
+  "classified_opaque_json_matches": [],
+  "findings": [
+    {
+      "category": "required_private_provenance_marker",
+      "count": 0,
+      "high_risk": false,
+      "resolution": "none",
+      "sample_files": []
+    },
+    {
+      "category": "cloud_or_internal_host_marker",
+      "count": 0,
+      "high_risk": false,
+      "resolution": "none",
+      "sample_files": []
+    },
+    {
+      "category": "generic_temp_path",
+      "count": 8,
+      "high_risk": false,
+      "resolution": "classified generic local path",
+      "sample_files": [
+        "sgx_worker/lib/mcl/README.md",
+        "tests/test_runtime_integration.py",
+        "third-party/openwhisk/asynccs-openwhisk.patch"
+      ]
+    },
+    {
+      "category": "non_loopback_ipv4",
+      "count": 0,
+      "high_risk": false,
+      "resolution": "none",
+      "sample_files": []
+    },
+    {
+      "category": "private_key_material",
+      "count": 0,
+      "high_risk": false,
+      "resolution": "none",
+      "sample_files": []
+    },
+    {
+      "category": "credential_value_marker",
+      "count": 0,
+      "high_risk": false,
+      "resolution": "none",
+      "sample_files": []
+    },
+    {
+      "category": "external_symlink",
+      "count": 0,
+      "high_risk": false,
+      "resolution": "none",
+      "sample_files": []
+    },
+    {
+      "category": "nested_git_directory",
+      "count": 0,
+      "high_risk": false,
+      "resolution": "none",
+      "sample_files": []
+    }
+  ],
+  "gitleaks": false,
+  "high_risk_findings": 0,
+  "repo": "asyncs-code-anon",
+  "required_private_provenance_marker_count": 0,
+  "scanned_files": 213,
+  "schema_version": "anonymous-release-scan-v2",
+  "unresolved_high_risk_findings": 0
+}

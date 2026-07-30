@@ -1,0 +1,14 @@
+*.pem
+*.key
+*.so
+*.a
+*.o
+*.bin
+*.real
+*.enc
+*.wasm
+build/
+target/
+generated/
+__pycache__/
+.pytest_cache/

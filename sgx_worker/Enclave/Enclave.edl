@@ -1,0 +1,178 @@
+enclave {
+    from "sgx_tstdc.edl" import *;
+    from "sgx_pthread.edl" import *;
+    from "sgx_wamr.edl" import *;
+
+    include "sgx_report.h"
+
+    struct c1_asyncs_invoke_trace_t {
+        uint32_t version;
+        uint32_t flags;
+        uint8_t rid[32];
+        uint32_t payload_bytes_consumed;
+        uint8_t payload_sha256[32];
+        uint32_t function_cache_bytes;
+        uint64_t input_key_decap_begin_cycles;
+        uint64_t input_key_decap_end_cycles;
+        uint64_t input_aes_gcm_begin_cycles;
+        uint64_t input_aes_gcm_end_cycles;
+        uint64_t workload_begin_cycles;
+        uint64_t workload_end_cycles;
+        uint64_t output_kem_begin_cycles;
+        uint64_t output_kem_end_cycles;
+        uint64_t output_aes_gcm_begin_cycles;
+        uint64_t output_aes_gcm_end_cycles;
+        uint64_t input_key_decap_cycles;
+        uint64_t input_aes_gcm_cycles;
+        uint64_t workload_core_cycles;
+        uint64_t output_kem_cycles;
+        uint64_t output_aes_gcm_cycles;
+        uint64_t function_key_decap_begin_cycles;
+        uint64_t function_key_decap_end_cycles;
+        uint64_t function_key_decap_cycles;
+        uint64_t cfunc_aes_gcm_begin_cycles;
+        uint64_t cfunc_aes_gcm_end_cycles;
+        uint64_t cfunc_aes_gcm_cycles;
+        uint64_t wasm_load_begin_cycles;
+        uint64_t wasm_load_end_cycles;
+        uint64_t wasm_load_cycles;
+        uint64_t wasm_instantiate_begin_cycles;
+        uint64_t wasm_instantiate_end_cycles;
+        uint64_t wasm_instantiate_cycles;
+    };
+
+    trusted {
+        public void ecall_init();
+        public void ecall_create_report(
+            [in] const sgx_target_info_t* target_info,
+            [out] sgx_report_t* report,
+            [out] uint8_t public_key[64]
+        );
+        public void ecall_decrypt_key(
+            [in, count=124] uint8_t* encrypted_key,
+            [out, count=32] uint8_t* decrypted_key,
+            [in, string] const char* fid
+        );
+        
+        /* Paper-compliant key loading: receive both dkf and dklabel from KMS
+         * encrypted_dkf: Encrypted FID-derived capability (124 bytes: ECDH blob)
+         * encrypted_dklabel: Encrypted label-derived capability (124 bytes: ECDH blob)
+         * fid: Function Identity
+         * 
+         * This is the preferred path (paper Sec. V):
+         * - dkf used for DecKey(dkf, C_key) -> k_req
+         * - dklabel used for DecKey(dklabel, C_k_func) -> k_func
+         * 
+         * KMS enforces BindLabelToFID(label, FID) before releasing dklabel.
+         */
+        public void ecall_decrypt_keys_batch(
+            [in, count=124] uint8_t* encrypted_dkf,
+            [in, count=124] uint8_t* encrypted_dklabel,
+            [in, string] const char* fid
+        );
+
+        /* BF-IBE key-release loading boundary.
+         *
+         * True bfibe-mcl-bls12381 support requires KMS to release
+         * variable-length serialized identity private-key records to the
+         * attested worker enclave. This ECALL fixes that variable-size
+         * boundary before the private-key import and BF decrypt backend are
+         * wired into the worker.
+         */
+        public int ecall_load_bfibe_key_release(
+            [in, size=release_size] uint8_t* release,
+            uint32_t release_size,
+            [in, string] const char* fid
+        );
+        
+        public int ecall_has_key([in, string] const char* fid);
+        public void ecall_run_wasm([in, size=wasm_size] uint8_t* wasm_buffer, uint32_t wasm_size);
+        public void ecall_run_encrypted_wasm(
+            [in, size=wasm_size] uint8_t* encrypted_wasm,
+            uint32_t wasm_size,
+            [in, size=input_size] uint8_t* encrypted_input,
+            uint32_t input_size,
+            /* G3: explicit key ciphertexts (iv||tag||ct) */
+            [in, size=c_k_func_size] uint8_t* c_k_func,
+            uint32_t c_k_func_size,
+            [in, size=c_key_size] uint8_t* c_key,
+            uint32_t c_key_size,
+            [in, count=16] uint8_t* nonce,
+            [in, count=65] uint8_t* pkU,
+            [out, size=max_out_size] uint8_t* encrypted_result,
+            uint32_t max_out_size,
+            [out] uint32_t* result_size,
+            [out, count=16] uint8_t* result_tag,
+            [out, count=12] uint8_t* result_iv,
+            [in, count=12] uint8_t* wasm_iv,
+            [in, count=16] uint8_t* wasm_mac,
+            [in, count=12] uint8_t* input_iv,
+            [in, count=16] uint8_t* input_mac
+        );
+        
+        /* KEM Encapsulation for result encryption
+         * pkU: Client public key (65 bytes: 04 || X || Y)
+         * ct_out: KEM ciphertext (65 bytes: ephemeral public key)
+         * key_out: Derived shared key (32 bytes)
+         * Returns 0 on success
+         */
+        public int ecall_kem_encap(
+            [in, count=65] uint8_t* pkU,
+            [out, count=65] uint8_t* ct_out,
+            [out, count=32] uint8_t* key_out
+        );
+        
+        /* Run encrypted WASM with KEM for result encryption
+         * pkU: Client public key for result encryption (65 bytes)
+         * kem_ct: Output KEM ciphertext (65 bytes) 
+         */
+        public void ecall_run_encrypted_wasm_kem(
+            [in, size=wasm_size] uint8_t* encrypted_wasm,
+            uint32_t wasm_size,
+            [in, size=input_size] uint8_t* encrypted_input,
+            uint32_t input_size,
+            /* G3: explicit key ciphertexts (iv||tag||ct) */
+            [in, size=c_k_func_size] uint8_t* c_k_func,
+            uint32_t c_k_func_size,
+            [in, size=c_key_size] uint8_t* c_key,
+            uint32_t c_key_size,
+            [in, count=16] uint8_t* nonce,
+            [in, count=65] uint8_t* pkU,
+            [out, size=max_out_size] uint8_t* encrypted_result,
+            uint32_t max_out_size,
+            [out] uint32_t* result_size,
+            [out, count=16] uint8_t* result_tag,
+            [out, count=12] uint8_t* result_iv,
+            [out, count=65] uint8_t* kem_ct,
+            [out] struct c1_asyncs_invoke_trace_t* invoke_trace,
+            [in, count=12] uint8_t* wasm_iv,
+            [in, count=16] uint8_t* wasm_mac,
+            [in, count=12] uint8_t* input_iv,
+            [in, count=16] uint8_t* input_mac
+        );
+        
+        /* MCL IBE Test - tests the mcl-based IBE implementation
+         * Returns 0 on success, -1 on failure
+         */
+        public int ecall_mcl_ibe_test();
+        
+        /* Clean up per-invocation sensitive state
+         * Zeroizes request-specific keys and intermediate buffers
+         * Should be called after each invocation completes
+         */
+        public void ecall_clean_ctx();
+        
+        /* Zeroize dklabel_func (label-derived key) after function load
+         * Security best practice: Minimizes exposure window
+         * After function plaintext is loaded into enclave, dklabel_func
+         * is no longer needed and should be destroyed immediately.
+         * Re-loading (e.g., scale-to-zero resume) will re-request from KMS.
+         * Returns 0 on success
+         */
+        public int ecall_zeroize_label_key();
+    };
+
+    untrusted {
+        void ocall_print([in, string] const char *str);
+    };
+};

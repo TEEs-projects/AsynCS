@@ -1,0 +1,11 @@
+enclave {
+    from "sgx_tstdc.edl" import *;
+    
+    trusted {
+        public sgx_status_t ecall_create_report(
+            [in] const sgx_target_info_t* target_info,
+            [in] const sgx_report_data_t* report_data,
+            [out] sgx_report_t* report
+        );
+    };
+};

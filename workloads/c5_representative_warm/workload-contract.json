@@ -1,0 +1,74 @@
+{
+  "artifact_file": "asyncs-c5-representative-warm.wasm",
+  "artifact_lifecycle": "versioned_experiment_input",
+  "artifact_sha256": "836ea3df370f0373319456aa13fdad1b6297ff4747839c5c685be615390bae8d",
+  "artifact_size_bytes": 392005,
+  "build_command": "bash tests/test_c5_representative_warm_workload.sh",
+  "build_target": "wasm32-wasip1",
+  "cargo_lock_sha256": "44e1739b2cd489bcd876ff23e930047bf664af76c365ba4c51fe66b51061fc44",
+  "cargo_toml_sha256": "9c790412c15117e759f8ae665ce7875324ad73e21787f7e8404b220f3729b0b7",
+  "crypto_and_transport": {
+    "correctness_probe_full_output": true,
+    "input": "existing BF-IBE key envelope plus AES-GCM C_req",
+    "measured_action_params_json_bytes": 1024,
+    "measured_result_json_bytes": 4096,
+    "output": "existing P-256 KEM plus AES-GCM C_out",
+    "rid_and_aad": "unchanged AsynCS request/result contract"
+  },
+  "direct_internal_timing": {
+    "begin_host_call": "env.c1_workload_tsc_begin",
+    "end_host_call": "env.c1_workload_tsc_end",
+    "metric": "workload_core_duration_ns",
+    "raw_metric": "workload_begin_cycles/workload_end_cycles"
+  },
+  "profile": "asyncs",
+  "schema_version": "c5-asyncs-workload-contract-v1",
+  "shared_contract": {
+    "executable_ref": "8de7c83d5ad32a46cbdc59e1f4c32feb5226eb95",
+    "relative_path": "experiments/current-scripts/C5/workload-contract-v1.json",
+    "sha256": "e78fac55ef7c486824d5912c6c956fc70520dacb6a913ad6b135fd51e2afbd43"
+  },
+  "source_sha256": "e2fecf71dd403e4b2dc77943b86da8952c47eca46766f76a94689f6d73854ee6",
+  "suite_id": "c5-representative-warm-v1",
+  "workloads": {
+    "compression-derived-random256k-level6-v1": {
+      "application_input_bytes": 262144,
+      "application_input_sha256": "04f7209a1428aceb9b838a3043af314defd245fab3da383edf7753f23133d184",
+      "input_relative_path": "experiments/current-scripts/C5/shared/random-256k-v1.bin",
+      "intentional_ocall": "none",
+      "output_verification": "gzip_decompress_exact_input",
+      "parameters": {
+        "algorithm": "gzip",
+        "input_pattern": "sha256_counter_random",
+        "level": 6
+      },
+      "workload_logic_hash": "c5-gzip-level6-random256k-v1"
+    },
+    "dynamic-html-derived-v1": {
+      "application_input_bytes": 436,
+      "application_input_sha256": "624e204f2a3e8409d707cec0a753b28e9ef86c5d6b61e80b3f9dce5f65b565e4",
+      "expected_output_bytes": 5701,
+      "expected_output_sha256": "cdb9944b223ec3c2b4cd08d7befbb9dc1f5aaccb0a82398268912268f3fc5d88",
+      "intentional_ocall": "none",
+      "output_verification": "exact_bytes",
+      "parameters": {
+        "item_count": 64,
+        "render_iterations": 800
+      },
+      "workload_logic_hash": "c5-dynamic-html-portable-render-v1"
+    },
+    "sleep50-path-control-v1": {
+      "application_input_bytes": 15,
+      "application_input_sha256": "229fc4e019f65848450ba31212e45e116f09d3285513f4dbbb8d7dda82ed679b",
+      "expected_output_bytes": 65,
+      "expected_output_sha256": "aef1b1ab66482ca3d54740cd83c8b2f96a90dc7fb8b71d99a19cb6c1b48e73c7",
+      "intentional_ocall": "wasi_poll_oneoff_to_sgx_clock_nanosleep",
+      "output_verification": "exact_bytes",
+      "parameters": {
+        "sleep_ms": 50,
+        "timer": "releases_cpu"
+      },
+      "workload_logic_hash": "c5-async-sleep50-v1"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "artifact_lifecycle": "versioned_experiment_input",
+  "artifacts": [
+    {
+      "artifact": "asyncs-c2-sleep50-65536.wasm",
+      "artifact_sha256": "0ae226ac4f77dd303a411d94101f83fed5335a0ab9227cbfc1d133e234b752be",
+      "raw_wasm_bytes": 65536
+    },
+    {
+      "artifact": "asyncs-c2-sleep50-262144.wasm",
+      "artifact_sha256": "129ae8b8db9e82aaf6b3e7ab68524ac07f7be7c7adffd1f4b1a92d7bb9ecbdda",
+      "raw_wasm_bytes": 262144
+    },
+    {
+      "artifact": "asyncs-c2-sleep50-1048576.wasm",
+      "artifact_sha256": "c4294088550f5f1c5b771e3be83598cf348b095f5069e37d3c49d85dadb7d6d4",
+      "raw_wasm_bytes": 1048576
+    },
+    {
+      "artifact": "asyncs-c2-sleep50-4194304.wasm",
+      "artifact_sha256": "f144467cf7f01bc54ff539709649584d0548e7679a2dce24a3284c91ca7ce395",
+      "raw_wasm_bytes": 4194304
+    }
+  ],
+  "base_artifact": "../backend_pressure_sleep50/asyncs-backend-pressure-sleep50.wasm",
+  "base_artifact_sha256": "7acaa09efe7de4824e983d17a478bb4d8a5ce908e21bb2211dbbfe7b909781d8",
+  "build_command": "workloads/c2_sleep50_package_grid/build.sh",
+  "build_inputs": [
+    "workloads/backend_pressure_sleep50/asyncs-backend-pressure-sleep50.wasm",
+    "workloads/c2_sleep50_package_grid/build_artifacts.py"
+  ],
+  "encrypted_package_size_policy": "record_observed_c_func_and_action_zip_bytes_separately",
+  "function_logic_fixed": true,
+  "intentional_ocall": "wasi_poll_oneoff_to_sgx_clock_nanosleep",
+  "padding_method": "deterministic_webassembly_custom_section_v1",
+  "profile": "asyncs",
+  "request_result_semantics_fixed": true,
+  "schema_version": "c2-asyncs-sleep50-package-grid-v1",
+  "workload_id": "asyncs-wasm-sleep-50ms",
+  "workload_kind": "wasm_sleep",
+  "workload_logic_hash": "rust-std-thread-sleep-50ms-v1",
+  "workload_sleep_ms": 50
+}
