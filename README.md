@@ -1,4 +1,4 @@
-# AsynCS: Preserving Asynchrony in Confidential Serverless Computing
+# AsynCS
 
 ## About the project
 
@@ -61,7 +61,6 @@ in the data repository under
 
 ## Release status and licenses
 
-The four repositories are currently private release candidates and require
-authorized GitHub access. The AsynCS project license remains to be decided
-before public release. Existing third-party licenses and notices are preserved
+The AsynCS project license has not yet been selected.
+Existing third-party licenses and notices are preserved
 as described in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

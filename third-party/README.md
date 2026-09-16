@@ -3,9 +3,9 @@
 The OpenWhisk and WAMR integrations have independent repositories. Each retains
 its original public upstream history plus exactly one anonymous integration
 commit. `SOURCE-REFS.tsv` records the upstream URL, base commit, component
-repository, branch, release commit, complete tree, and patch SHA256. These are
-private release candidates; they have not been published publicly. The AsynCS
-project license remains undecided; upstream licenses and notices are retained.
+repository, branch, release commit, complete tree, and patch SHA256.
+The AsynCS project license remains undecided. Upstream licenses and notices are
+retained.
 
 | Component | Official upstream | Pinned upstream base | Component repository (`main`) |
 |---|---|---|---|
@@ -19,8 +19,7 @@ from the official repositories with complete ancestry during release preparation
 ## Use the independent component repositories
 
 From the AsynCS repository root, set absolute destinations outside this checkout.
-Authenticate with GitHub for access to the private candidates, then clone and
-check out the fixed integration commits (do not apply patches again):
+Clone and check out the fixed integration commits (do not apply patches again):
 
 ```bash
 export OPENWHISK_ROOT=/path/to/openwhisk

@@ -20,8 +20,7 @@ Obtain the pinned OpenWhisk and WAMR integrations from the independent
 reconstruct them in clean public-upstream checkouts with
 `third-party/apply-patches.sh`. Exact clone/checkout commands and commit IDs are
 in [third-party/README.md](third-party/README.md) and `third-party/SOURCE-REFS.tsv`.
-The component checkout and patch methods produce identical source trees. These
-are currently private candidates; the AsynCS project license is not yet decided.
+The component checkout and patch methods produce identical source trees.
 Data and reproduction instructions are in
 [AsynCS-experiments](https://github.com/TEEs-projects/AsynCS-experiments).
 Run the lightweight tests with:
